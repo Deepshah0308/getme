@@ -1,6 +1,6 @@
 # getme
 
-Claim a free `yourname.is-a.dev` subdomain in a few clicks: **https://getme.is-a.dev**
+Claim a free `yourname.is-a.dev` subdomain in a few clicks: **https://getme.deepshah.is-a.dev**
 
 1. **Check:** reads the live [is-a-dev/register](https://github.com/is-a-dev/register) repo, plus its reserved and internal lists, to tell you whether the name is free.
 2. **Generate:** builds the `domains/<name>.json` file for GitHub Pages, Vercel, Netlify, any CNAME host, or a plain redirect.
