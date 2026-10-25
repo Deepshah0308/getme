@@ -5,50 +5,96 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>getme · claim your is-a.dev subdomain</title>
 <meta name="description" content="Check if a .is-a.dev subdomain is free, generate the DNS file and open a pre-filled pull request in a few clicks.">
+<meta name="theme-color" content="#060609">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root { --bg:#f7f7fb; --fg:#18181d; --muted:#5f5f6b; --line:#dedee6; --card:#fff; --accent:#5c46eb; --ok:#127a3e; --bad:#b42318; }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg:#0f0f13; --fg:#ececf2; --muted:#a3a3b0; --line:#2a2a33; --card:#17171d; --accent:#9b8cff; --ok:#4ade80; --bad:#f87171; }
+  :root {
+    --bg: #060609; --panel: rgba(255,255,255,.03); --fg: #EDEEF2; --muted: #8A8F9E;
+    --line: rgba(255,255,255,.09); --accent: #6E8BFF; --ok: #3DDC97; --bad: #FF6B6B;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
   }
-  * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif; }
-  main { max-width:680px; margin:0 auto; padding:48px 16px 80px; }
-  h1 { font-size:2rem; margin:0 0 4px; letter-spacing:-.02em; }
-  h1 span { color:var(--accent); }
-  h2 { font-size:1.05rem; margin:0 0 12px; }
-  p.lead { color:var(--muted); margin:0 0 28px; }
-  section { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px; margin-bottom:16px; }
-  label { display:block; font-size:.9rem; font-weight:600; margin:12px 0 4px; }
-  label small { font-weight:400; color:var(--muted); }
-  input, select, textarea { width:100%; font:inherit; color:inherit; background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:9px 11px; }
-  input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
-  .row { display:flex; gap:8px; align-items:center; }
-  .row input { flex:1; }
-  .suffix { color:var(--muted); white-space:nowrap; }
-  button, .btn { font:inherit; font-weight:600; background:var(--accent); color:#fff; border:0; border-radius:8px; padding:9px 16px; cursor:pointer; display:inline-block; text-decoration:none; }
-  button.ghost { background:transparent; color:var(--accent); border:1px solid var(--line); padding:4px 10px; font-size:.85rem; }
-  #status { margin:10px 0 0; min-height:1.5em; }
-  #status.ok { color:var(--ok); } #status.bad { color:var(--bad); }
-  pre { background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:12px; overflow:auto; margin:6px 0; }
-  textarea { min-height:160px; font:13px/1.4 ui-monospace,monospace; }
-  ol { padding-left:20px; } ol li { margin:10px 0; }
-  .head { display:flex; justify-content:space-between; align-items:center; gap:8px; }
-  code { font-size:.9em; }
-  footer { color:var(--muted); font-size:.85rem; margin-top:28px; }
-  a { color:var(--accent); }
+  * { box-sizing: border-box; }
+  html, body { overflow-x: clip; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.55 "Geist", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  body::before { /* blueprint grid fading out from the top */
+    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+    background-size: 48px 48px; mask-image: radial-gradient(ellipse at 50% 0%, #000 30%, transparent 80%);
+  }
+  .glow { position: absolute; top: -220px; left: 50%; width: min(820px, 100vw); height: 480px; transform: translateX(-50%); border-radius: 50%; background: radial-gradient(closest-side, var(--accent), transparent); opacity: .35; filter: blur(60px); pointer-events: none; z-index: -1; }
+  a { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
+  .wrap { position: relative; max-width: 760px; margin: 0 auto; padding: 24px 16px 72px; }
+
+  nav { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; border: 1px solid var(--line); border-radius: 999px; background: rgba(6,6,9,.6); backdrop-filter: blur(14px); }
+  nav b { letter-spacing: -.01em; } nav b span { color: var(--accent); }
+  nav a { color: var(--muted); text-decoration: none; font-size: 14px; } nav a:hover { color: var(--fg); }
+
+  .label { font: 500 11px/1 var(--mono); letter-spacing: .08em; color: var(--muted); }
+  .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 10px var(--ok); margin-right: 8px; vertical-align: middle; }
+  h1 { margin: 56px 0 12px; font-size: clamp(2.4rem, 7vw, 4.2rem); line-height: .98; letter-spacing: -.04em; font-weight: 650; }
+  h1 em { font-style: normal; background: linear-gradient(90deg, var(--fg), var(--accent)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lead { color: var(--muted); max-width: 54ch; margin: 0 0 32px; }
+
+  .card { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 22px; margin-bottom: 14px; overflow: hidden; isolation: isolate; }
+  .card::before { content: ""; position: absolute; inset: 0; z-index: -1; opacity: 0; transition: opacity .3s; background: radial-gradient(380px circle at var(--x,50%) var(--y,50%), rgba(110,139,255,.14), transparent 60%); }
+  .card:hover::before { opacity: 1; }
+  .card[hidden] { display: none; }
+  h2 { display: flex; align-items: center; gap: 10px; margin: 0 0 16px; font-size: 1.05rem; font-weight: 600; }
+  h2 .n { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 7px; border: 1px solid var(--line); font: 500 12px var(--mono); color: var(--accent); }
+
+  /* big domain input */
+  .domain { display: flex; align-items: center; gap: 4px; border: 1px solid var(--line); border-radius: 14px; padding: 6px 6px 6px 18px; background: rgba(255,255,255,.02); transition: border-color .2s, box-shadow .2s; }
+  .domain:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(110,139,255,.15); }
+  .domain input { flex: 1; min-width: 0; border: 0; background: none; color: var(--fg); font: 500 clamp(1.1rem, 4vw, 1.6rem) var(--mono); padding: 10px 0; outline: none; }
+  .domain .suffix { font: 500 clamp(1.1rem, 4vw, 1.6rem) var(--mono); color: var(--muted); white-space: nowrap; }
+  #status { margin: 12px 0 0; min-height: 1.5em; font: 14px var(--mono); color: var(--muted); }
+  #status.ok { color: var(--ok); } #status.bad { color: var(--bad); }
+
+  label { display: block; font-size: 14px; font-weight: 500; margin: 14px 0 6px; }
+  label small { font-weight: 400; color: var(--muted); }
+  input, select, textarea { width: 100%; font: inherit; color: var(--fg); background: rgba(255,255,255,.02); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; transition: border-color .2s; }
+  select option { background: #111118; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
+  .grid2 { display: grid; gap: 0 14px; grid-template-columns: 1fr 1fr; }
+  @media (max-width: 560px) { .grid2 { grid-template-columns: 1fr; } }
+
+  button, .btn { font: 600 15px "Geist", sans-serif; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 20px; border-radius: 999px; border: 0; cursor: pointer; text-decoration: none; background: var(--fg); color: var(--bg); transition: opacity .2s, transform .15s; }
+  button:hover, .btn:hover { opacity: .9; } button:active, .btn:active { transform: scale(.97); }
+  button.ghost { background: transparent; color: var(--fg); border: 1px solid var(--line); min-height: 34px; padding: 0 14px; font-size: 13px; }
+  button.ghost:hover { border-color: var(--accent); }
+
+  ol { list-style: none; counter-reset: s; padding: 0; margin: 0; }
+  ol > li { counter-increment: s; position: relative; padding: 0 0 22px 36px; border-left: 1px solid var(--line); margin-left: 11px; }
+  ol > li:last-child { border-color: transparent; padding-bottom: 0; }
+  ol > li::before { content: counter(s); position: absolute; left: -12px; top: 0; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 7px; background: var(--bg); border: 1px solid var(--line); font: 500 12px var(--mono); color: var(--accent); }
+  .head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
+  pre, textarea.code { font: 13px/1.5 var(--mono); }
+  pre { background: rgba(255,255,255,.02); border: 1px solid var(--line); border-radius: 10px; padding: 14px; overflow: auto; margin: 0 0 12px; color: #7FD4FF; }
+  textarea.code { min-height: 170px; color: var(--muted); }
+  small.note { display: block; color: var(--muted); margin-top: 8px; font-size: 13px; }
+  code { font: 13px var(--mono); color: var(--fg); background: rgba(255,255,255,.06); padding: 2px 6px; border-radius: 6px; }
+  footer { margin-top: 32px; color: var(--muted); font-size: 13px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
 <body>
-<main>
-  <h1>get<span>me</span></h1>
-  <p class="lead">Grab a free <b>yourname.is-a.dev</b> subdomain. Check availability, generate the DNS file, and open a pre-filled pull request to <a href="https://github.com/is-a-dev/register">is-a-dev/register</a>. No account linking and no backend: everything runs in your browser.</p>
+<div class="wrap">
+  <div class="glow" aria-hidden="true"></div>
+  <nav><b>get<span>.</span>me</b><a href="https://deepshah.is-a.dev">by Deep Shah</a></nav>
 
-  <section>
-    <h2>1 · Is it free?</h2>
+  <p class="label" style="margin-top:48px"><span class="dot"></span>free subdomains for developers</p>
+  <h1>Claim your <em>.is-a.dev</em> in a minute.</h1>
+  <p class="lead">Check a name, generate the DNS file and open a pre-filled pull request to <a href="https://github.com/is-a-dev/register">is-a-dev/register</a>. No accounts, no backend. Everything runs in your browser.</p>
+
+  <section class="card">
+    <h2><span class="n">1</span>Is it free?</h2>
     <form id="check">
-      <label for="name">Subdomain</label>
-      <div class="row">
-        <input id="name" autocomplete="off" spellcheck="false" placeholder="yourname" required>
+      <label for="name" class="sr" style="position:absolute;left:-9999px">Subdomain</label>
+      <div class="domain">
+        <input id="name" autocomplete="off" spellcheck="false" placeholder="yourname" required autofocus>
         <span class="suffix">.is-a.dev</span>
         <button>Check</button>
       </div>
@@ -56,13 +102,13 @@
     </form>
   </section>
 
-  <section id="step2" hidden>
-    <h2>2 · Where's your site?</h2>
+  <section class="card" id="step2" hidden>
+    <h2><span class="n">2</span>Where's your site?</h2>
     <form id="details">
-      <label for="username">GitHub username</label>
-      <input id="username" required autocomplete="username">
-      <label for="email">Contact email <small>(required by is-a.dev for contact; it becomes public in the PR)</small></label>
-      <input id="email" type="email" required autocomplete="email">
+      <div class="grid2">
+        <div><label for="username">GitHub username</label><input id="username" required autocomplete="username"></div>
+        <div><label for="email">Contact email <small>(public in the PR)</small></label><input id="email" type="email" required autocomplete="email"></div>
+      </div>
       <label for="host">Hosting</label>
       <select id="host">
         <option value="github">GitHub Pages</option>
@@ -81,33 +127,41 @@
       </div>
       <label for="purpose">What's the site for?</label>
       <input id="purpose" placeholder="Personal developer portfolio showing my projects.">
-      <p><button>Generate</button></p>
+      <p style="margin:18px 0 0"><button>Generate</button></p>
     </form>
   </section>
 
-  <section id="step3" hidden>
-    <h2>3 · Claim it</h2>
+  <section class="card" id="step3" hidden>
+    <h2><span class="n">3</span>Claim it</h2>
     <ol>
       <li>
         <div class="head"><span>Your file, <code id="fname"></code></span></div>
         <pre id="file"></pre>
         <a id="pr" class="btn" target="_blank" rel="noopener">Open on GitHub ↗</a>
-        <br><small>GitHub forks the repo for you and opens a commit with this file. Click <b>Propose changes</b>, then <b>Create pull request</b>.</small>
+        <small class="note">GitHub forks the repo for you. Click <b>Propose changes</b>, then <b>Create pull request</b>.</small>
       </li>
       <li>
-        <div class="head"><span>Replace the PR description with this, then tick every checkbox yourself:</span><button class="ghost" data-copy="tpl">Copy</button></div>
-        <textarea id="tpl" readonly></textarea>
-        <small>The maintainers review each site by hand. It must be finished, about software development and non-commercial. "Hello world" pages get rejected.</small>
+        <div class="head"><span>Paste this as the PR description, then tick every checkbox yourself</span><button class="ghost" data-copy="tpl">Copy</button></div>
+        <textarea id="tpl" class="code" readonly></textarea>
+        <small class="note">Maintainers review each site by hand. It must be finished, about software development and non-commercial.</small>
       </li>
       <li id="pages">
-        Once the PR is merged, open your <a id="pagesLink" target="_blank" rel="noopener">repository's Pages settings</a> and set <b>Custom domain</b> to <code id="cnameVal"></code>. Then turn on <b>Enforce HTTPS</b> when it becomes available.
+        Once merged, open your <a id="pagesLink" target="_blank" rel="noopener">repository's Pages settings</a>, set <b>Custom domain</b> to <code id="cnameVal"></code> and turn on <b>Enforce HTTPS</b>.
       </li>
       <li>DNS goes live a few minutes after the merge.</li>
     </ol>
   </section>
 
-  <footer>Availability is read live from the register repo. A name can still be claimed by an open PR that hasn't been merged yet. · <a href="https://docs.is-a.dev">is-a.dev docs</a> · <a href="https://github.com/Deepshah0308/getme">source</a></footer>
-</main>
+  <footer>Availability is read live from the register repo; a name can still be taken by an open PR. · <a href="https://docs.is-a.dev">is-a.dev docs</a> · <a href="https://github.com/Deepshah0308/getme">source</a></footer>
+</div>
+<script>
+  // mouse spotlight for cards
+  document.querySelectorAll(".card").forEach((c) => c.addEventListener("mousemove", (e) => {
+    const r = c.getBoundingClientRect();
+    c.style.setProperty("--x", e.clientX - r.left + "px");
+    c.style.setProperty("--y", e.clientY - r.top + "px");
+  }));
+</script>
 <script src="app.js"></script>
 </body>
 </html>
