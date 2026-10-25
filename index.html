@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>getme · claim your is-a.dev subdomain</title>
+<meta name="description" content="Check if a .is-a.dev subdomain is free, generate the DNS file and open a pre-filled pull request in a few clicks.">
+<style>
+  :root { --bg:#f7f7fb; --fg:#18181d; --muted:#5f5f6b; --line:#dedee6; --card:#fff; --accent:#5c46eb; --ok:#127a3e; --bad:#b42318; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0f0f13; --fg:#ececf2; --muted:#a3a3b0; --line:#2a2a33; --card:#17171d; --accent:#9b8cff; --ok:#4ade80; --bad:#f87171; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  main { max-width:680px; margin:0 auto; padding:48px 16px 80px; }
+  h1 { font-size:2rem; margin:0 0 4px; letter-spacing:-.02em; }
+  h1 span { color:var(--accent); }
+  h2 { font-size:1.05rem; margin:0 0 12px; }
+  p.lead { color:var(--muted); margin:0 0 28px; }
+  section { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px; margin-bottom:16px; }
+  label { display:block; font-size:.9rem; font-weight:600; margin:12px 0 4px; }
+  label small { font-weight:400; color:var(--muted); }
+  input, select, textarea { width:100%; font:inherit; color:inherit; background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:9px 11px; }
+  input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+  .row { display:flex; gap:8px; align-items:center; }
+  .row input { flex:1; }
+  .suffix { color:var(--muted); white-space:nowrap; }
+  button, .btn { font:inherit; font-weight:600; background:var(--accent); color:#fff; border:0; border-radius:8px; padding:9px 16px; cursor:pointer; display:inline-block; text-decoration:none; }
+  button.ghost { background:transparent; color:var(--accent); border:1px solid var(--line); padding:4px 10px; font-size:.85rem; }
+  #status { margin:10px 0 0; min-height:1.5em; }
+  #status.ok { color:var(--ok); } #status.bad { color:var(--bad); }
+  pre { background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:12px; overflow:auto; margin:6px 0; }
+  textarea { min-height:160px; font:13px/1.4 ui-monospace,monospace; }
+  ol { padding-left:20px; } ol li { margin:10px 0; }
+  .head { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  code { font-size:.9em; }
+  footer { color:var(--muted); font-size:.85rem; margin-top:28px; }
+  a { color:var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1>get<span>me</span></h1>
+  <p class="lead">Grab a free <b>yourname.is-a.dev</b> subdomain. Check availability, generate the DNS file, and open a pre-filled pull request to <a href="https://github.com/is-a-dev/register">is-a-dev/register</a>. No account linking and no backend: everything runs in your browser.</p>
+
+  <section>
+    <h2>1 · Is it free?</h2>
+    <form id="check">
+      <label for="name">Subdomain</label>
+      <div class="row">
+        <input id="name" autocomplete="off" spellcheck="false" placeholder="yourname" required>
+        <span class="suffix">.is-a.dev</span>
+        <button>Check</button>
+      </div>
+      <p id="status" role="status" aria-live="polite"></p>
+    </form>
+  </section>
+
+  <section id="step2" hidden>
+    <h2>2 · Where's your site?</h2>
+    <form id="details">
+      <label for="username">GitHub username</label>
+      <input id="username" required autocomplete="username">
+      <label for="email">Contact email <small>(required by is-a.dev for contact; it becomes public in the PR)</small></label>
+      <input id="email" type="email" required autocomplete="email">
+      <label for="host">Hosting</label>
+      <select id="host">
+        <option value="github">GitHub Pages</option>
+        <option value="vercel">Vercel</option>
+        <option value="netlify">Netlify</option>
+        <option value="cname">Other host (CNAME)</option>
+        <option value="redirect">Just redirect to a URL</option>
+      </select>
+      <div id="repoRow">
+        <label for="repo">Pages repository <small>(leave empty for username.github.io)</small></label>
+        <input id="repo" placeholder="my-portfolio">
+      </div>
+      <div id="targetRow" hidden>
+        <label for="target">Points to</label>
+        <input id="target">
+      </div>
+      <label for="purpose">What's the site for?</label>
+      <input id="purpose" placeholder="Personal developer portfolio showing my projects.">
+      <p><button>Generate</button></p>
+    </form>
+  </section>
+
+  <section id="step3" hidden>
+    <h2>3 · Claim it</h2>
+    <ol>
+      <li>
+        <div class="head"><span>Your file, <code id="fname"></code></span></div>
+        <pre id="file"></pre>
+        <a id="pr" class="btn" target="_blank" rel="noopener">Open on GitHub ↗</a>
+        <br><small>GitHub forks the repo for you and opens a commit with this file. Click <b>Propose changes</b>, then <b>Create pull request</b>.</small>
+      </li>
+      <li>
+        <div class="head"><span>Replace the PR description with this, then tick every checkbox yourself:</span><button class="ghost" data-copy="tpl">Copy</button></div>
+        <textarea id="tpl" readonly></textarea>
+        <small>The maintainers review each site by hand. It must be finished, about software development and non-commercial. "Hello world" pages get rejected.</small>
+      </li>
+      <li id="pages">
+        Once the PR is merged, open your <a id="pagesLink" target="_blank" rel="noopener">repository's Pages settings</a> and set <b>Custom domain</b> to <code id="cnameVal"></code>. Then turn on <b>Enforce HTTPS</b> when it becomes available.
+      </li>
+      <li>DNS goes live a few minutes after the merge.</li>
+    </ol>
+  </section>
+
+  <footer>Availability is read live from the register repo. A name can still be claimed by an open PR that hasn't been merged yet. · <a href="https://docs.is-a.dev">is-a.dev docs</a> · <a href="https://github.com/Deepshah0308/getme">source</a></footer>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
